@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>STS Analyzer</title>
+<link rel="manifest" href="manifest.json">
+<style>
+  :root {
+    --primary: #078f42;
+    --text: #1f2a24;
+    --muted: #6b7f75;
+    --surface: #ffffff;
+    --surface-alt: #f5f8f6;
+    --shadow: 0 18px 45px rgba(7, 143, 66, 0.12);
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    color: var(--text);
+    background: linear-gradient(180deg, rgba(7, 143, 66, 0.06) 0%, rgba(255, 255, 255, 0.9) 40%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 18px 48px;
+  }
+
+  .app-shell {
+    width: 100%;
+    max-width: 440px;
+    background: var(--surface);
+    border-radius: 28px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+
+  header {
+    background: linear-gradient(135deg, rgba(7, 143, 66, 0.92) 0%, rgba(7, 143, 66, 0.75) 100%);
+    color: #fff;
+    padding: 28px 28px 36px;
+    text-align: center;
+  }
+
+  header h1 {
+    margin: 0 0 6px;
+    font-size: 1.9rem;
+    letter-spacing: -0.02em;
+  }
+
+  header p {
+    margin: 0;
+    font-size: 0.95rem;
+    color: rgba(255, 255, 255, 0.85);
+  }
+
+  main {
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    background: var(--surface);
+  }
+
+  .status-card {
+    border-radius: 20px;
+    background: var(--surface-alt);
+    padding: 20px;
+    border: 1px solid rgba(7, 143, 66, 0.12);
+  }
+
+  .status-card h2 {
+    margin: 0 0 12px;
+    font-size: 1.9rem;
+    color: var(--primary);
+    letter-spacing: 0.01em;
+    text-align: center;
+  }
+
+  .message {
+    min-height: 24px;
+    font-weight: 600;
+    font-size: 1.9rem;
+    text-align: center;
+  }
+
+  .message.empty {
+    color: var(--muted);
+    font-weight: 500;
+    font-size: 1rem;
+  }
+
+  .controls {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+  }
+
+  button {
+    border: none;
+    border-radius: 18px;
+    padding: 14px 16px;
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    cursor: pointer;
+  }
+
+  #startButton {
+    background: var(--primary);
+    color: #fff;
+    box-shadow: 0 12px 25px rgba(7, 143, 66, 0.25);
+  }
+
+  #stopButton {
+    background: rgba(7, 143, 66, 0.12);
+    color: var(--primary);
+    box-shadow: inset 0 0 0 2px rgba(7, 143, 66, 0.3);
+  }
+
+  button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+
+  button:not(:disabled):active {
+    transform: scale(0.97);
+  }
+
+  .info-list {
+    display: grid;
+    gap: 12px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .info-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 0.93rem;
+    color: var(--muted);
+  }
+
+  .info-content {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .info-bullet {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--primary);
+    flex-shrink: 0;
+  }
+
+  .video-embed {
+    position: relative;
+    width: 100%;
+    max-width: 100%;
+    padding-top: 56.25%;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: inset 0 0 0 1px rgba(7, 143, 66, 0.12);
+  }
+
+  .video-embed iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+
+  .plot-card {
+    background: var(--surface-alt);
+    border-radius: 24px;
+    padding: 20px;
+    border: 1px solid rgba(7, 143, 66, 0.12);
+  }
+
+  .plot-card h2 {
+    margin: 0 0 12px;
+    font-size: 1.05rem;
+    color: var(--primary);
+  }
+
+  .plot-wrapper {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    border-radius: 18px;
+    overflow: hidden;
+    background: #fff;
+    box-shadow: inset 0 0 0 1px rgba(7, 143, 66, 0.08);
+  }
+
+  canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  footer {
+    padding: 0 28px 32px;
+    text-align: center;
+    font-size: 0.78rem;
+    color: var(--muted);
+  }
+
+  @media (max-width: 420px) {
+    header {
+      padding: 24px 22px 30px;
+    }
+
+    header h1 {
+      font-size: 1.7rem;
+      text-align: center;
+    }
+
+    main {
+      padding: 24px;
+    }
+  }
+</style>
+</head>
+<body>
+  <div class="app-shell">
+    <header>
+      <h1>5× Sit-to-Stand Test</h1>     
+    </header>
+
+    <main>
+      <section class="status-card">
+        <h2>RESULTS</h2>
+        <div id="message" class="message empty">Awaiting trial start.</div>
+      </section>
+
+      <section class="controls">
+        <button id="startButton">Start Logging</button>
+        <button id="stopButton" disabled>Stop Logging</button>
+      </section>
+
+      <section aria-label="Usage guidance">
+        <ul class="info-list">
+          <li><span class="info-bullet"></span>Press the "Start Logging" button.</li>
+          <li><span class="info-bullet"></span>Hold your phone upright with the screen against your chest during the assessment - then sit still for 5 seconds.</li>
+          <li><span class="info-bullet"></span>Perform five full sit-to-stand repetitions as fast as you safely can.</li>
+          <li><span class="info-bullet"></span>Sit still for 5 seconds, then take your phone off your chest and press the "Stop Logging" button.</li>
+          <li><span class="info-bullet"></span>Note your STS time which appears.</li>
+          <li>
+            <span class="info-bullet"></span>
+            <div class="info-content">
+              <span>To see an example of the test being performed watch this video:</span>
+              <div class="video-embed">
+                <iframe src="https://www.youtube.com/embed/a6p9bnW4bus?si=Bt4Dgor0EyaZBbI5" title="5× Sit-to-Stand Test example video" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+              </div>
+            </div>
+          </li>
+        </ul>
+      </section>
+
+      <section class="plot-card" aria-label="Analysis chart">
+        <h2>Motion Envelope - Pilot Testing Only</h2>
+        <div class="plot-wrapper">
+          <canvas id="plot" width="800" height="400"></canvas>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      Designed by Ross Clark, Yong Hao Pua and Salma Ibrahim for easy assessment of STS. Optimized for Android & iOS devices.
+    </footer>
+  </div>
+
+<script>
+let loggedData = [];
+let loggingIntervalId = null;
+let accel = { x: 0, y: 0, z: 0 };
+let gyro = { alpha: 0, beta: 0, gamma: 0 };
+let startTime = null;
+let audioContext = null;
+let availableVoices = [];
+let countdownIntervalId = null;
+let countdownTimeouts = [];
+let isLogging = false;
+const supportsSpeech = 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window;
+let countdownActive = false;
+let restingData = [];
+let dynamicCompletionThreshold = null;
+let countdownThresholds = null;
+let trialCompleteAnnounced = false;
+let belowThresholdDuration = 0;
+let lastMonitorCheck = 0;
+let movementDetected = false;
+let lastAboveThresholdTime = null;
+let countdownEndSampleIndex = 0;
+const MONITOR_CHECK_INTERVAL = 250;
+const COMPLETION_WINDOW_MS = 3000;
+
+function ensureAudioContext() {
+  const AudioContextCtor = window.AudioContext || window.webkitAudioContext;
+  if (!AudioContextCtor) return null;
+  if (!audioContext) audioContext = new AudioContextCtor();
+  if (audioContext.state === 'suspended') {
+    audioContext.resume().catch(() => {});
+  }
+  return audioContext;
+}
+
+function populateVoices() {
+  if (!supportsSpeech) return;
+  const voices = speechSynthesis.getVoices();
+  availableVoices = voices.filter(v => v.lang && v.lang.toLowerCase().startsWith('en'));
+  if (!availableVoices.length) availableVoices = voices;
+}
+
+function getPreferredVoice() {
+  if (!supportsSpeech) return null;
+  if (!availableVoices.length) populateVoices();
+  return (
+    availableVoices.find(v => /en-GB/i.test(v.lang)) ||
+    availableVoices.find(v => /en-US/i.test(v.lang)) ||
+    availableVoices[0] ||
+    null
+  );
+}
+
+function speak(text, options = {}) {
+  if (!text) return;
+  if (!supportsSpeech) {
+    if (options.onend) options.onend();
+    return;
+  }
+  speechSynthesis.cancel();
+  const utterance = new SpeechSynthesisUtterance(text);
+  const voice = getPreferredVoice();
+  if (voice) utterance.voice = voice;
+  if (options.onend) utterance.onend = options.onend;
+  speechSynthesis.speak(utterance);
+}
+
+function clearCountdowns() {
+  if (countdownIntervalId) {
+    clearInterval(countdownIntervalId);
+    countdownIntervalId = null;
+  }
+  countdownTimeouts.forEach(timeoutId => clearTimeout(timeoutId));
+  countdownTimeouts = [];
+  countdownActive = false;
+}
+
+function startVisualCountdown(seconds, onComplete) {
+  if (!isLogging) return;
+  let remaining = seconds;
+  showMessage(`Starting in ${remaining}...`);
+  countdownIntervalId = setInterval(() => {
+    remaining -= 1;
+    if (remaining > 0) {
+      showMessage(`Starting in ${remaining}...`);
+    } else {
+      clearInterval(countdownIntervalId);
+      countdownIntervalId = null;
+      showMessage('GO!');
+      if (typeof onComplete === 'function') onComplete();
+    }
+  }, 1000);
+}
+
+function startSpokenCountdown(seconds, onComplete) {
+  if (!isLogging) return;
+  if (!supportsSpeech) return;
+  for (let i = 0; i < seconds; i++) {
+    const number = seconds - i;
+    countdownTimeouts.push(
+      setTimeout(() => speak(String(number)), i * 1000)
+    );
+  }
+  countdownTimeouts.push(
+    setTimeout(() => speak('Go', {
+      onend: () => {
+        if (typeof onComplete === 'function') onComplete();
+      }
+    }), seconds * 1000)
+  );
+}
+
+function beginCountdown(seconds) {
+  if (!isLogging) return;
+  clearCountdowns();
+  countdownActive = true;
+  restingData = [];
+  belowThresholdDuration = 0;
+  lastMonitorCheck = 0;
+  startVisualCountdown(seconds, handleCountdownComplete);
+  startSpokenCountdown(seconds, handleCountdownComplete);
+  if (!supportsSpeech) {
+    countdownTimeouts.push(
+      setTimeout(() => handleCountdownComplete(), seconds * 1000)
+    );
+  }
+}
+
+function handleCountdownComplete() {
+  if (!countdownActive) return;
+  countdownActive = false;
+  if (!isLogging) return;
+  if (restingData.length < 3) return;
+  const metrics = processSignalForEnvelope(restingData);
+  if (metrics && Number.isFinite(metrics.thrHi)) {
+    dynamicCompletionThreshold = metrics.thrHi;
+    countdownThresholds = Number.isFinite(metrics.thrLo)
+      ? { thrHi: metrics.thrHi, thrLo: metrics.thrLo }
+      : { thrHi: metrics.thrHi, thrLo: null };
+  } else {
+    dynamicCompletionThreshold = null;
+    countdownThresholds = null;
+  }
+  belowThresholdDuration = 0;
+  restingData = [];
+  movementDetected = false;
+  lastAboveThresholdTime = null;
+  countdownEndSampleIndex = loggedData.length;
+}
+
+function monitorTrialCompletion() {
+  if (dynamicCompletionThreshold == null || trialCompleteAnnounced) return;
+  if (loggedData.length < 3) return;
+  const metrics = processSignalForEnvelope(loggedData);
+  if (!metrics) return;
+  const { timestamps, env, thrHi } = metrics;
+  if (timestamps.length < 2 || env.length < 1) return;
+  const latestIndex = env.length - 1;
+  const currentValue = env[latestIndex];
+  const currentTime = timestamps[latestIndex];
+  if (!movementDetected) {
+    const startIndex = Math.min(Math.max(countdownEndSampleIndex, 0), latestIndex);
+    for (let i = startIndex; i <= latestIndex; i++) {
+      if (env[i] > (Number.isFinite(thrHi) ? thrHi : dynamicCompletionThreshold)) {
+        movementDetected = true;
+        lastAboveThresholdTime = timestamps[i];
+        belowThresholdDuration = 0;
+        break;
+      }
+    }
+    if (!movementDetected) return;
+  }
+  if (currentValue >= dynamicCompletionThreshold) {
+    lastAboveThresholdTime = currentTime;
+    belowThresholdDuration = 0;
+    return;
+  }
+  if (lastAboveThresholdTime == null) {
+    lastAboveThresholdTime = currentTime;
+    belowThresholdDuration = 0;
+    return;
+  }
+  belowThresholdDuration = currentTime - lastAboveThresholdTime;
+  if (belowThresholdDuration >= COMPLETION_WINDOW_MS) {
+    announceTrialComplete();
+  }
+}
+
+function announceTrialComplete() {
+  if (trialCompleteAnnounced) return;
+  trialCompleteAnnounced = true;
+  showMessage('Trial Complete');
+  document.getElementById('stopButton').disabled = true;
+  if (supportsSpeech) {
+    speak('Trial Complete', {
+      onend: () => stopLogging()
+    });
+  } else {
+    stopLogging();
+  }
+}
+
+if (supportsSpeech) {
+  populateVoices();
+  speechSynthesis.onvoiceschanged = populateVoices;
+}
+
+function showMessage(text, isError = false) {
+  const msg = document.getElementById('message');
+  msg.classList.remove('empty');
+  msg.style.color = isError ? '#d62828' : '#078f42';
+  msg.textContent = text;
+}
+
+function requestPermissions() {
+  if (typeof DeviceMotionEvent.requestPermission === 'function') {
+    DeviceMotionEvent.requestPermission().then(state => {
+      if (state === 'granted') window.addEventListener('devicemotion', handleMotion);
+    }).catch(console.error);
+  } else {
+    window.addEventListener('devicemotion', handleMotion);
+  }
+  if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+    DeviceOrientationEvent.requestPermission().then(state => {
+      if (state === 'granted') window.addEventListener('deviceorientation', handleOrientation);
+    }).catch(console.error);
+  } else {
+    window.addEventListener('deviceorientation', handleOrientation);
+  }
+}
+
+function handleMotion(e) {
+  accel.x = e.acceleration.x || 0;
+  accel.y = e.acceleration.y || 0;
+  accel.z = e.acceleration.z || 0;
+}
+function handleOrientation(e) {
+  gyro.alpha = e.alpha || 0;
+  gyro.beta = e.beta || 0;
+  gyro.gamma = e.gamma || 0;
+}
+
+function processSignalForEnvelope(data) {
+  if (!data || data.length < 3) return null;
+  const timestamps = data.map(row => parseFloat(row[0]));
+  if (timestamps.length < 3) return null;
+  const accelY = data.map(row => parseFloat(row[2]));
+  const totalDuration = timestamps[timestamps.length - 1] - timestamps[0];
+  const avgDt = (timestamps.length > 1 && totalDuration > 0)
+    ? totalDuration / (timestamps.length - 1)
+    : 0;
+  if (!avgDt) return null;
+  const fs = 1000 / avgDt;
+  if (!Number.isFinite(fs) || fs <= 0) return null;
+
+  function butterworthHighPass(signal, cutoffHz) {
+    const RC = 1.0 / (2 * Math.PI * cutoffHz);
+    const dt = 1.0 / fs;
+    const alpha = RC / (RC + dt);
+    const out = [signal[0]];
+    for (let i = 1; i < signal.length; i++) {
+      out.push(alpha * (out[i - 1] + signal[i] - signal[i - 1]));
+    }
+    return out;
+  }
+
+  const hp = butterworthHighPass(accelY, 0.25);
+  if (hp.length < 3) return null;
+
+  const psi = new Array(hp.length).fill(0);
+  for (let i = 1; i < hp.length - 1; i++) {
+    const value = hp[i] ** 2 - hp[i + 1] * hp[i - 1];
+    psi[i] = value < 0 ? 0 : value;
+  }
+
+  const win = Math.max(3, Math.floor(0.25 * fs));
+  const env = psi.map((_, i) => {
+    const start = Math.max(0, i - win);
+    const end = Math.min(psi.length, i + win);
+    const subset = psi.slice(start, end);
+    const sum = subset.reduce((acc, val) => acc + val, 0);
+    return subset.length ? sum / subset.length : 0;
+  });
+
+  const winB = Math.max(1, Math.floor(2.0 * fs));
+  const searchLimit = Math.max(0, Math.min(Math.floor(0.15 * env.length), env.length) - winB);
+  let bestIdx = 0;
+  let bestMean = Infinity;
+  for (let i = 0; i <= searchLimit; i++) {
+    const slice = env.slice(i, i + winB);
+    if (!slice.length) continue;
+    const mean = slice.reduce((acc, val) => acc + val, 0) / slice.length;
+    if (mean < bestMean) {
+      bestMean = mean;
+      bestIdx = i;
+    }
+  }
+
+  const baseline = env.slice(bestIdx, bestIdx + winB);
+  if (!baseline.length) return null;
+  const mu = baseline.reduce((acc, val) => acc + val, 0) / baseline.length;
+  const variance = baseline.reduce((acc, val) => acc + (val - mu) ** 2, 0) / baseline.length;
+  const sd = Math.sqrt(variance);
+  const thrHi = mu + 7 * sd;
+  const thrLo = mu + 3 * sd;
+
+  return { timestamps, env, fs, thrHi, thrLo };
+}
+
+document.getElementById('startButton').addEventListener('click', () => {
+  ensureAudioContext();
+  requestPermissions();
+  loggedData = [];
+  startTime = Date.now();
+  restingData = [];
+  dynamicCompletionThreshold = null;
+  countdownThresholds = null;
+  trialCompleteAnnounced = false;
+  belowThresholdDuration = 0;
+  countdownActive = false;
+  lastMonitorCheck = 0;
+  movementDetected = false;
+  lastAboveThresholdTime = null;
+  countdownEndSampleIndex = 0;
+  loggingIntervalId = setInterval(() => {
+    const t = Date.now() - startTime;
+    const sample = [t, accel.x, accel.y, accel.z, gyro.alpha, gyro.beta, gyro.gamma];
+    loggedData.push(sample);
+    if (countdownActive) restingData.push(sample);
+    if (dynamicCompletionThreshold != null && !trialCompleteAnnounced) {
+      const now = Date.now();
+      if (now - lastMonitorCheck >= MONITOR_CHECK_INTERVAL) {
+        lastMonitorCheck = now;
+        monitorTrialCompletion();
+      }
+    }
+  }, 50); // 20Hz
+  document.getElementById('startButton').disabled = true;
+  document.getElementById('stopButton').disabled = false;
+  isLogging = true;
+  clearCountdowns();
+  const instruction = 'Hold the phone upright in both hands with the screen against your chest, then begin the test on the word Go. Remember to sit still with the phone still on your chest for 5 seconds at the end of the test';
+  showMessage(instruction);
+  speak(instruction, {
+    onend: () => {
+      if (!isLogging) return;
+      beginCountdown(5);
+    }
+  });
+});
+
+document.getElementById('stopButton').addEventListener('click', stopLogging);
+
+function stopLogging() {
+  if (loggingIntervalId) {
+    clearInterval(loggingIntervalId);
+    loggingIntervalId = null;
+  }
+  isLogging = false;
+  clearCountdowns();
+  if (supportsSpeech) speechSynthesis.cancel();
+  document.getElementById('startButton').disabled = false;
+  document.getElementById('stopButton').disabled = true;
+  dynamicCompletionThreshold = null;
+  countdownThresholds = null;
+  restingData = [];
+  belowThresholdDuration = 0;
+  trialCompleteAnnounced = false;
+  lastMonitorCheck = 0;
+  movementDetected = false;
+  lastAboveThresholdTime = null;
+  countdownEndSampleIndex = 0;
+  showMessage('Logging stopped. Analyzing...');
+  analyzeSTS();
+}
+
+async function analyzeSTS() {
+  if (loggedData.length < 10) return showMessage('Not enough data to analyze.', true);
+
+  const metrics = processSignalForEnvelope(loggedData);
+  if (!metrics) return showMessage('Unable to process data.', true);
+
+  const { timestamps, env, fs } = metrics;
+  let thrHi = metrics.thrHi;
+  let thrLo = metrics.thrLo;
+  if (countdownThresholds) {
+    if (Number.isFinite(countdownThresholds.thrHi)) thrHi = countdownThresholds.thrHi;
+    if (Number.isFinite(countdownThresholds.thrLo)) thrLo = countdownThresholds.thrLo;
+  }
+
+  const aboveHi = env.map(v => v > thrHi);
+  const aboveLo = env.map(v => v > thrLo);
+
+  // --- Improved "end of test" segment detection (2s window with 75% below the threshold) ---
+  let segs = [], inSeg = false, start = 0;
+  const belowWindow = Math.floor(2.0 * fs);
+  const requiredFraction = 0.75;
+  for (let i = 0; i < env.length; i++) {
+    if (aboveLo[i] && !inSeg) { start = i; inSeg = true; }
+    else if (!aboveLo[i] && inSeg) {
+      const ahead = env.slice(i, i+belowWindow);
+      if (ahead.length < belowWindow) continue;
+      const belowFraction = ahead.filter(v => v < thrLo).length / ahead.length;
+      if (belowFraction >= requiredFraction) {
+        if (aboveHi.slice(start,i).some(Boolean)) segs.push([start,i]);
+        inSeg = false;
+      }
+    }
+  }
+  if (inSeg) segs.push([start, env.length-1]);
+  if (segs.length === 0) return showMessage('No STS detected', true);
+
+  // --- Select strongest segment ---
+  const bestSeg = segs.reduce((a,b) =>
+    env.slice(b[0],b[1]).reduce((x,y)=>x+y,0) >
+    env.slice(a[0],a[1]).reduce((x,y)=>x+y,0) ? b : a
+  );
+  const duration = (timestamps[bestSeg[1]] - timestamps[bestSeg[0]]) / 1000.0;
+
+  if (duration < 4 || duration > 30)
+    return showMessage('Invalid STS duration', true);
+
+  const calibratedTime = -0.5748 + 0.9486 * duration;
+  showMessage(`Calibrated STS Time: ${calibratedTime.toFixed(2)} s (raw: ${duration.toFixed(2)} s)`);
+
+  // --- Plot with thresholds ---
+  plotEnvelope(timestamps, env, bestSeg, thrLo, thrHi);
+}
+
+function plotEnvelope(timestamps, env, bestSeg, thrLo, thrHi) {
+  const canvas = document.getElementById('plot');
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+
+  const tMin = timestamps[0], tMax = timestamps[timestamps.length-1];
+  const eMax = Math.max(...env);
+  const scaleX = canvas.width / (tMax - tMin);
+  const scaleY = canvas.height / eMax;
+
+  // Shaded STS region
+  const x1 = (timestamps[bestSeg[0]] - tMin) * scaleX;
+  const x2 = (timestamps[bestSeg[1]] - tMin) * scaleX;
+  ctx.fillStyle = 'rgba(255, 165, 0, 0.25)';
+  ctx.fillRect(x1, 0, x2 - x1, canvas.height);
+
+  // Envelope line
+  ctx.beginPath();
+  ctx.moveTo(0, canvas.height - env[0]*scaleY);
+  for (let i=1; i<env.length; i++) {
+    const x = (timestamps[i] - tMin) * scaleX;
+    const y = canvas.height - env[i]*scaleY;
+    ctx.lineTo(x, y);
+  }
+  ctx.strokeStyle = 'blue';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  // Threshold lines
+  const yHi = canvas.height - thrHi * scaleY;
+  const yLo = canvas.height - thrLo * scaleY;
+
+  ctx.setLineDash([6,4]);
+  ctx.strokeStyle = 'red';
+  ctx.beginPath(); ctx.moveTo(0, yHi); ctx.lineTo(canvas.width, yHi); ctx.stroke();
+  ctx.strokeStyle = 'green';
+  ctx.beginPath(); ctx.moveTo(0, yLo); ctx.lineTo(canvas.width, yLo); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Labels
+  ctx.fillStyle = 'black';
+  ctx.font = '14px Arial';
+  ctx.fillText('Blue = TKEO Envelope', 10, 20);
+  ctx.fillText('Orange = Detected STS', 10, 40);
+  ctx.fillStyle = 'red'; ctx.fillText('Red = High Threshold (thrHi)', 10, 60);
+  ctx.fillStyle = 'green'; ctx.fillText('Green = Low Threshold (thrLo)', 10, 80);
+}
+</script>
+<script>
+(function(){if(!window.chatbase||window.chatbase("getState")!=="initialized"){window.chatbase=(...arguments)=>{if(!window.chatbase.q){window.chatbase.q=[]}window.chatbase.q.push(arguments)};window.chatbase=new Proxy(window.chatbase,{get(target,prop){if(prop==="q"){return target.q}return(...args)=>target(prop,...args)}})}const onLoad=function(){const script=document.createElement("script");script.src="https://www.chatbase.co/embed.min.js";script.id="xUhCRt3MY4uogpIKN7CD_";script.domain="www.chatbase.co";document.body.appendChild(script)};if(document.readyState==="complete"){onLoad()}else{window.addEventListener("load",onLoad)}})();
+</script>
+</body>
+</html>
