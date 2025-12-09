@@ -7,12 +7,12 @@
 <link rel="manifest" href="manifest.json">
 <style>
   :root {
-    --primary: #078f42;
-    --text: #1f2a24;
-    --muted: #6b7f75;
-    --surface: #ffffff;
-    --surface-alt: #f5f8f6;
-    --shadow: 0 18px 45px rgba(7, 143, 66, 0.12);
+    --primary: #d946ef;
+    --text: #3b0a44;
+    --muted: #7a4b7f;
+    --surface: #fff7fb;
+    --surface-alt: #fde9ff;
+    --shadow: 0 18px 45px rgba(217, 70, 239, 0.18);
   }
 
   * {
@@ -24,7 +24,7 @@
     min-height: 100vh;
     font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
     color: var(--text);
-    background: linear-gradient(180deg, rgba(7, 143, 66, 0.06) 0%, rgba(255, 255, 255, 0.9) 40%);
+    background: linear-gradient(180deg, rgba(217, 70, 239, 0.12) 0%, rgba(168, 85, 247, 0.08) 40%, rgba(255, 247, 251, 0.95) 100%);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -41,7 +41,7 @@
   }
 
   header {
-    background: linear-gradient(135deg, rgba(7, 143, 66, 0.92) 0%, rgba(7, 143, 66, 0.75) 100%);
+    background: linear-gradient(135deg, rgba(217, 70, 239, 0.95) 0%, rgba(168, 85, 247, 0.85) 100%);
     color: #fff;
     padding: 28px 28px 36px;
     text-align: center;
@@ -71,7 +71,7 @@
     border-radius: 20px;
     background: var(--surface-alt);
     padding: 20px;
-    border: 1px solid rgba(7, 143, 66, 0.12);
+    border: 1px solid rgba(217, 70, 239, 0.18);
   }
 
   .status-card h2 {
@@ -115,13 +115,13 @@
   #startButton {
     background: var(--primary);
     color: #fff;
-    box-shadow: 0 12px 25px rgba(7, 143, 66, 0.25);
+    box-shadow: 0 12px 25px rgba(217, 70, 239, 0.28);
   }
 
   #stopButton {
-    background: rgba(7, 143, 66, 0.12);
+    background: rgba(217, 70, 239, 0.12);
     color: var(--primary);
-    box-shadow: inset 0 0 0 2px rgba(7, 143, 66, 0.3);
+    box-shadow: inset 0 0 0 2px rgba(217, 70, 239, 0.3);
   }
 
   button:disabled {
@@ -171,7 +171,7 @@
     padding-top: 56.25%;
     border-radius: 18px;
     overflow: hidden;
-    box-shadow: inset 0 0 0 1px rgba(7, 143, 66, 0.12);
+    box-shadow: inset 0 0 0 1px rgba(217, 70, 239, 0.12);
   }
 
   .video-embed iframe {
@@ -187,7 +187,7 @@
     background: var(--surface-alt);
     border-radius: 24px;
     padding: 20px;
-    border: 1px solid rgba(7, 143, 66, 0.12);
+    border: 1px solid rgba(217, 70, 239, 0.12);
   }
 
   .plot-card h2 {
@@ -203,7 +203,7 @@
     border-radius: 18px;
     overflow: hidden;
     background: #fff;
-    box-shadow: inset 0 0 0 1px rgba(7, 143, 66, 0.08);
+    box-shadow: inset 0 0 0 1px rgba(217, 70, 239, 0.08);
   }
 
   canvas {
@@ -238,31 +238,31 @@
 <body>
   <div class="app-shell">
     <header>
-      <h1>5× Sit-to-Stand Test</h1>     
+      <h1>Enchanted Sit-to-Stand Quest 🦄</h1>
     </header>
 
     <main>
       <section class="status-card">
-        <h2>RESULTS</h2>
-        <div id="message" class="message empty">Awaiting trial start.</div>
+        <h2>Fairy-Tale Results ✨</h2>
+        <div id="message" class="message empty">Awaiting the magic to begin...</div>
       </section>
 
       <section class="controls">
-        <button id="startButton">Start Logging</button>
-        <button id="stopButton" disabled>Stop Logging</button>
+        <button id="startButton">Start Magical Logging 🧚‍♀️</button>
+        <button id="stopButton" disabled>Pause the Spell</button>
       </section>
 
       <section aria-label="Usage guidance">
         <ul class="info-list">
-          <li><span class="info-bullet"></span>Press the "Start Logging" button.</li>
-          <li><span class="info-bullet"></span>Hold your phone upright with the screen against your chest during the assessment - then sit still for 5 seconds.</li>
-          <li><span class="info-bullet"></span>Perform five full sit-to-stand repetitions as fast as you safely can.</li>
-          <li><span class="info-bullet"></span>Sit still for 5 seconds, then take your phone off your chest and press the "Stop Logging" button.</li>
-          <li><span class="info-bullet"></span>Note your STS time which appears.</li>
+          <li><span class="info-bullet"></span>Tap "Start Magical Logging" to summon the spell.</li>
+          <li><span class="info-bullet"></span>Hold your enchanted phone upright against your chest like a crystal talisman, then stay still for 5 seconds.</li>
+          <li><span class="info-bullet"></span>Complete five swift sit-to-stand moves as if leaping with unicorn power.</li>
+          <li><span class="info-bullet"></span>Settle like a fairy landing for 5 seconds, then lift the phone and press "Pause the Spell".</li>
+          <li><span class="info-bullet"></span>Record the shimmering STS time that appears.</li>
           <li>
             <span class="info-bullet"></span>
             <div class="info-content">
-              <span>To see an example of the test being performed watch this video:</span>
+              <span>Peek into this portal to see the ritual in action:</span>
               <div class="video-embed">
                 <iframe src="https://www.youtube.com/embed/a6p9bnW4bus?si=Bt4Dgor0EyaZBbI5" title="5× Sit-to-Stand Test example video" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
               </div>
@@ -272,7 +272,7 @@
       </section>
 
       <section class="plot-card" aria-label="Analysis chart">
-        <h2>Motion Envelope - Pilot Testing Only</h2>
+        <h2>Mystic Motion Aura (pilot plotting)</h2>
         <div class="plot-wrapper">
           <canvas id="plot" width="800" height="400"></canvas>
         </div>
@@ -280,7 +280,7 @@
     </main>
 
     <footer>
-      Designed by Ross Clark, Yong Hao Pua and Salma Ibrahim for easy assessment of STS. Optimized for Android & iOS devices.
+      Crafted by Ross Clark, Yong Hao Pua and Salma Ibrahim for a touch of magic in every STS journey. Optimized for Android & iOS devices.
     </footer>
   </div>
 
@@ -372,7 +372,7 @@ function startVisualCountdown(seconds, onComplete) {
     } else {
       clearInterval(countdownIntervalId);
       countdownIntervalId = null;
-      showMessage('GO!');
+      showMessage('GO! ✨');
       if (typeof onComplete === 'function') onComplete();
     }
   }, 1000);
@@ -475,7 +475,7 @@ function monitorTrialCompletion() {
 function announceTrialComplete() {
   if (trialCompleteAnnounced) return;
   trialCompleteAnnounced = true;
-  showMessage('Trial Complete');
+  showMessage('Trial Complete! 🦄');
   document.getElementById('stopButton').disabled = true;
   if (supportsSpeech) {
     speak('Trial Complete', {
@@ -494,7 +494,7 @@ if (supportsSpeech) {
 function showMessage(text, isError = false) {
   const msg = document.getElementById('message');
   msg.classList.remove('empty');
-  msg.style.color = isError ? '#d62828' : '#078f42';
+  msg.style.color = isError ? '#e11d48' : '#b832d8';
   msg.textContent = text;
 }
 
@@ -625,7 +625,7 @@ document.getElementById('startButton').addEventListener('click', () => {
   document.getElementById('stopButton').disabled = false;
   isLogging = true;
   clearCountdowns();
-  const instruction = 'Hold the phone upright in both hands with the screen against your chest, then begin the test on the word Go. Remember to sit still with the phone still on your chest for 5 seconds at the end of the test';
+  const instruction = 'Hold the enchanted phone upright against your chest, then begin on the word Go. Finish with 5 seconds of fairy stillness at the end of the test 🦄';
   showMessage(instruction);
   speak(instruction, {
     onend: () => {
@@ -656,15 +656,15 @@ function stopLogging() {
   movementDetected = false;
   lastAboveThresholdTime = null;
   countdownEndSampleIndex = 0;
-  showMessage('Logging stopped. Analyzing...');
+  showMessage('Spell paused. The crystal ball is analyzing...');
   analyzeSTS();
 }
 
 async function analyzeSTS() {
-  if (loggedData.length < 10) return showMessage('Not enough data to analyze.', true);
+  if (loggedData.length < 10) return showMessage('Not enough enchanted data to analyze.', true);
 
   const metrics = processSignalForEnvelope(loggedData);
-  if (!metrics) return showMessage('Unable to process data.', true);
+  if (!metrics) return showMessage('The magic fizzled—unable to process data.', true);
 
   const { timestamps, env, fs } = metrics;
   let thrHi = metrics.thrHi;
@@ -694,7 +694,7 @@ async function analyzeSTS() {
     }
   }
   if (inSeg) segs.push([start, env.length-1]);
-  if (segs.length === 0) return showMessage('No STS detected', true);
+  if (segs.length === 0) return showMessage('No enchanted sit-to-stand detected', true);
 
   // --- Select strongest segment ---
   const bestSeg = segs.reduce((a,b) =>
@@ -704,10 +704,10 @@ async function analyzeSTS() {
   const duration = (timestamps[bestSeg[1]] - timestamps[bestSeg[0]]) / 1000.0;
 
   if (duration < 4 || duration > 30)
-    return showMessage('Invalid STS duration', true);
+    return showMessage('This STS spell is outside the valid time window.', true);
 
   const calibratedTime = -0.5748 + 0.9486 * duration;
-  showMessage(`Calibrated STS Time: ${calibratedTime.toFixed(2)} s (raw: ${duration.toFixed(2)} s)`);
+  showMessage(`Calibrated STS Time: ${calibratedTime.toFixed(2)} s (raw: ${duration.toFixed(2)} s) ✨`);
 
   // --- Plot with thresholds ---
   plotEnvelope(timestamps, env, bestSeg, thrLo, thrHi);
